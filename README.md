@@ -1,6 +1,6 @@
-# Google Authenticator MCP Service
+# Google Authenticator MCP
 
-一个功能完整的 Google Authenticator MCP（Model Context Protocol）服务，提供 TOTP 验证码生成、otpauth URL 解析和 Google Authenticator 迁移 URL 解析功能。
+Google Authenticator MCP（Model Context Protocol）服务，提供 TOTP 验证码生成、otpauth URL 解析和 Google Authenticator 迁移 URL 解析功能。
 
 ## 🚀 功能特性
 
@@ -8,7 +8,6 @@
 - **迁移 URL 解析**：解析 `otpauth-migration://offline?data=...` 格式的 Google Authenticator 迁移链接
 - **TOTP 验证码生成**：支持从密钥或 otpauth URL 生成时间基于的一次性密码
 - **批量处理**：从迁移 URL 批量解析并生成所有账户的验证码
-- **URL 验证**：验证 otpauth URL 的格式和有效性
 
 ### 支持的算法和格式
 - **哈希算法**：SHA1, SHA256, SHA512, MD5
@@ -22,7 +21,7 @@
 
 ### 可用的 MCP 工具
 
-服务提供以下4个 MCP 工具函数：
+服务提供以下 MCP 工具函数：
 
 #### 1. `parse_migration_url`
 解析 Google Authenticator 迁移 URL
@@ -32,19 +31,19 @@
 }
 ```
 
-#### 2. `generate_totp_token`
-生成 TOTP 验证码
-```json
-{
-  "secret_or_url": "ABCDEF..."
-}
-```
-
-#### 3. `generate_all_tokens_from_migration`
+#### 2. `generate_all_tokens_from_migration`
 从迁移 URL 批量生成所有账户的验证码
 ```json
 {
   "migration_url": "otpauth-migration://offline?data=..."
+}
+```
+
+#### 3. `generate_totp_token`
+生成 TOTP 验证码
+```json
+{
+  "secret_or_url": "ABCDEF..."
 }
 ```
 
