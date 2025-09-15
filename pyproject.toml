@@ -1,0 +1,19 @@
+[project]
+name = "mcp-google-authenticator"
+version = "0.1.0"
+description = "Google Authenticator MCP Service - 提供TOTP验证码生成、otpauth URL解析和Google Authenticator迁移URL解析功能"
+readme = "README.md"
+authors = [
+    { name = "nblog" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "semantic-kernel[mcp]>=1.36.0",
+]
+
+[project.scripts]
+mcp-google-authenticator = "mcp_google_authenticator:main"
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
