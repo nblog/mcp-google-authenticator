@@ -1,5 +1,4 @@
 """MCP服务器主程序."""
-import asyncio
 import argparse
 import logging
 from typing import Any, Literal
@@ -19,7 +18,7 @@ def validate_environment():
     return True
 
 
-async def create_kernel() -> Kernel:
+def create_kernel() -> Kernel:
     """创建Semantic Kernel."""
     kernel = Kernel()
     
@@ -56,7 +55,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-async def run(transport: Literal["sse", "stdio"] = "stdio", port: int | None = None) -> None:
+def run(transport: Literal["sse", "stdio"] = "stdio", port: int | None = None) -> None:
     """
     异步运行 MCP 任务执行服务器
     
@@ -74,7 +73,7 @@ async def run(transport: Literal["sse", "stdio"] = "stdio", port: int | None = N
         validate_environment()
         
         # 创建Kernel
-        kernel = await create_kernel()
+        kernel = create_kernel()
         
         # 创建MCP服务器
         server = kernel.as_mcp_server(
@@ -93,20 +92,15 @@ async def run(transport: Literal["sse", "stdio"] = "stdio", port: int | None = N
             
             import uvicorn
             from mcp.server.sse import SseServerTransport
-            from starlette.applications import Starlette  
+            from starlette.applications import Starlette
             from starlette.routing import Mount, Route
-            
+
             sse = SseServerTransport("/messages/")
-            
+
             async def handle_sse(request):
-                async with sse.connect_sse(
-                    request.scope, request.receive, request._send
-                ) as (read_stream, write_stream):
-                    await server.run(
-                        read_stream, write_stream, 
-                        server.create_initialization_options()
-                    )
-            
+                async with sse.connect_sse(request.scope, request.receive, request._send) as (read_stream, write_stream):
+                    await server.run(read_stream, write_stream, server.create_initialization_options())
+
             starlette_app = Starlette(
                 debug=True,
                 routes=[
@@ -114,29 +108,19 @@ async def run(transport: Literal["sse", "stdio"] = "stdio", port: int | None = N
                     Mount("/messages/", app=sse.handle_post_message),
                 ],
             )
-            
-            # 检查是否已经在事件循环中运行
-            try:
-                loop = asyncio.get_running_loop()
-                # 如果在事件循环中，使用 uvicorn 的异步运行方式
-                config = uvicorn.Config(starlette_app, host="0.0.0.0", port=port)
-                uvicorn_server = uvicorn.Server(config)
-                await uvicorn_server.serve()
-            except RuntimeError:
-                # 没有运行的事件循环，使用同步方式
-                uvicorn.run(starlette_app, host="0.0.0.0", port=port)  # nosec
-            
+
+            uvicorn.run(starlette_app, host="0.0.0.0", port=port)  # nosec
         elif transport == "stdio":
             logger.info("启动STDIO服务器")
             
+            import anyio
+            from mcp.server.stdio import stdio_server
+
             async def handle_stdin(stdin: Any | None = None, stdout: Any | None = None) -> None:
                 async with stdio_server() as (read_stream, write_stream):
-                    await server.run(
-                        read_stream, write_stream,
-                        server.create_initialization_options()
-                    )
-            
-            await handle_stdin()
+                    await server.run(read_stream, write_stream, server.create_initialization_options())
+
+            anyio.run(handle_stdin)
         
         else:
             raise ValueError("SSE模式需要指定端口号")
@@ -157,22 +141,7 @@ def main():
     # 设置日志级别
     logging.getLogger().setLevel(getattr(logging, args.log_level))
     
-    try:
-        # 检查是否已经在事件循环中运行（比如在调试模式下）
-        loop = asyncio.get_running_loop()
-        # 如果在事件循环中，创建任务来运行
-        logger.info("检测到运行中的事件循环，创建任务运行服务器")
-        task = loop.create_task(run(args.transport, args.port))
-        return task
-    except RuntimeError:
-        # 没有运行的事件循环，创建新的
-        try:
-            asyncio.run(run(args.transport, args.port)) 
-        except KeyboardInterrupt:
-            logger.info("服务器已停止")
-        except Exception as e:
-            logger.error(f"运行错误: {e}")
-            exit(1)
+    run(transport=args.transport, port=args.port)
 
 
 if __name__ == "__main__":

@@ -386,66 +386,6 @@ class GoogleAuthenticatorPlugin:
                 'error': str(e)
             }, ensure_ascii=False, indent=2)
 
-    @kernel_function(description="Generate TOTP authentication code from either an otpauth URL or a base32 secret key")
-    def generate_totp_token(self, secret_or_url: str, algorithm: str = "SHA1", digits: int = 6, period: int = 30) -> str:
-        """
-        生成TOTP验证码
-        
-        Args:
-            secret_or_url: Base32密钥字符串或完整的otpauth URL
-            algorithm: 哈希算法 (SHA1, SHA256, SHA512)
-            digits: 验证码位数 (6或8)
-            period: 时间周期（秒）
-        
-        Returns:
-            str: JSON格式的结果，包含验证码和相关信息
-        """
-        try:
-            self.logger.info(f"生成TOTP令牌，输入类型: {'URL' if secret_or_url.startswith('otpauth://') else '密钥'}")
-            
-            # 判断输入是URL还是密钥
-            if secret_or_url.startswith('otpauth://'):
-                # 解析otpauth URL
-                params = self._parse_otpauth_url(secret_or_url)
-                secret = params['secret']
-                algorithm = params['algorithm']
-                digits = params['digits']
-                period = params['period']
-                label = params['label']
-            else:
-                # 直接使用密钥
-                secret = secret_or_url
-                label = "Manual Entry"
-            
-            # 生成TOTP令牌
-            token = self._get_totp_token(secret, period, algorithm, digits)
-            
-            # 计算剩余时间
-            current_time = int(time.time())
-            time_remaining = period - (current_time % period)
-            
-            self.logger.info(f"成功生成TOTP令牌: {token}")
-            
-            import json
-            return json.dumps({
-                'success': True,
-                'token': token,
-                'label': label,
-                'algorithm': algorithm,
-                'digits': digits,
-                'period': period,
-                'time_remaining': time_remaining,
-                'generated_at': current_time
-            }, ensure_ascii=False, indent=2)
-            
-        except Exception as e:
-            self.logger.error(f"生成TOTP令牌失败: {e}")
-            import json
-            return json.dumps({
-                'success': False,
-                'error': str(e)
-            }, ensure_ascii=False, indent=2)
-
     @kernel_function(description="Batch generate TOTP authentication codes for all accounts from a Google Authenticator migration URL")
     def generate_all_tokens_from_migration(self, migration_url: str) -> str:
         """
@@ -509,6 +449,66 @@ class GoogleAuthenticatorPlugin:
             
         except Exception as e:
             self.logger.error(f"批量生成TOTP令牌失败: {e}")
+            import json
+            return json.dumps({
+                'success': False,
+                'error': str(e)
+            }, ensure_ascii=False, indent=2)
+
+    @kernel_function(description="Generate TOTP authentication code from either an otpauth URL or a base32 secret key")
+    def generate_totp_token(self, secret_or_url: str, algorithm: str = "SHA1", digits: int = 6, period: int = 30) -> str:
+        """
+        生成TOTP验证码
+        
+        Args:
+            secret_or_url: Base32密钥字符串或完整的otpauth URL
+            algorithm: 哈希算法 (SHA1, SHA256, SHA512)
+            digits: 验证码位数 (6或8)
+            period: 时间周期（秒）
+        
+        Returns:
+            str: JSON格式的结果，包含验证码和相关信息
+        """
+        try:
+            self.logger.info(f"生成TOTP令牌，输入类型: {'URL' if secret_or_url.startswith('otpauth://') else '密钥'}")
+            
+            # 判断输入是URL还是密钥
+            if secret_or_url.startswith('otpauth://'):
+                # 解析otpauth URL
+                params = self._parse_otpauth_url(secret_or_url)
+                secret = params['secret']
+                algorithm = params['algorithm']
+                digits = params['digits']
+                period = params['period']
+                label = params['label']
+            else:
+                # 直接使用密钥
+                secret = secret_or_url
+                label = "Manual Entry"
+            
+            # 生成TOTP令牌
+            token = self._get_totp_token(secret, period, algorithm, digits)
+            
+            # 计算剩余时间
+            current_time = int(time.time())
+            time_remaining = period - (current_time % period)
+            
+            self.logger.info(f"成功生成TOTP令牌: {token}")
+            
+            import json
+            return json.dumps({
+                'success': True,
+                'token': token,
+                'label': label,
+                'algorithm': algorithm,
+                'digits': digits,
+                'period': period,
+                'time_remaining': time_remaining,
+                'generated_at': current_time
+            }, ensure_ascii=False, indent=2)
+            
+        except Exception as e:
+            self.logger.error(f"生成TOTP令牌失败: {e}")
             import json
             return json.dumps({
                 'success': False,
