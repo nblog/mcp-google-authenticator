@@ -30,7 +30,7 @@ def create_kernel() -> Kernel:
 
 def parse_arguments():
     """解析命令行参数."""
-    parser = argparse.ArgumentParser(description="运行MCP服务器")
+    parser = argparse.ArgumentParser(description="运行MCP服务器，支持SSE和STDIO传输方式")
     parser.add_argument(
         "--transport",
         type=str,
