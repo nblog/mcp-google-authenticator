@@ -19,6 +19,23 @@ Google Authenticator MCP（Model Context Protocol）服务，提供 TOTP 验证�
 
 ### 启动 MCP 服务
 
+#### 快速启动 (STDIO 模式)
+
+```json
+{
+    "mcpServers": {
+        "mcp-google-authenticator": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "mcp-google-authenticator@git+https://github.com/nblog/mcp-google-authenticator.git",
+                "mcp-google-authenticator"
+            ]
+        }
+    }
+}
+```
+
 ### 可用的 MCP 工具
 
 服务提供以下 MCP 工具函数：
@@ -72,10 +89,6 @@ Google Authenticator 的迁移数据使用 Protocol Buffers (protobuf) 格式编
 ### 支持的URL格式
 - **迁移URL**：`otpauth-migration://offline?data=<base64-encoded-protobuf>`
 - **标准URL**：`otpauth://totp/Label?secret=SECRET&issuer=ISSUER&algorithm=SHA1&digits=6&period=30`
-
-## 📄 许可证
-
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
 
 ## 🙏 参考
 
