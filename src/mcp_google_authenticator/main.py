@@ -4,6 +4,7 @@ import logging
 from typing import Any, Literal
 
 from semantic_kernel import Kernel
+from pydantic_settings import BaseSettings
 
 from .google_authenticator_plugin import GoogleAuthenticatorPlugin
 
@@ -17,7 +18,7 @@ def validate_environment():
     return True
 
 
-def create_kernel() -> Kernel:
+def create_kernel(config: BaseSettings | None = None) -> Kernel:
     """创建Semantic Kernel."""
     kernel = Kernel()
     
