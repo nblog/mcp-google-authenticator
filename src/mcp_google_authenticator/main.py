@@ -4,7 +4,6 @@ import logging
 from typing import Any, Literal
 
 from semantic_kernel import Kernel
-from mcp.server.stdio import stdio_server
 
 from .google_authenticator_plugin import GoogleAuthenticatorPlugin
 
